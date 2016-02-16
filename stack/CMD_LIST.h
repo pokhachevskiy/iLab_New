@@ -1,0 +1,7 @@
+DEF_CMD( EXIT, 0, exit() )
+DEF_CMD( PUSH, 1,  push() )
+DEF_CMD(  POP, 2, pop() )
+DEF_CMD( ADD, 3, push(pop() + pop()) )
+DEF_CMD( MUL, 4, push(pop()*pop()) )
+DEF_CMD( DIV, 5, push(pop()/pop()) )
+DEF_CMD( SUB, 6, push(pop() - pop()) )
