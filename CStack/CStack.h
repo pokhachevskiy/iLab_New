@@ -8,7 +8,7 @@
 const int STACK_MAX_SIZE = 100;
 typedef char T;
 using namespace std;
-const unsigned int MAX_LENGTH = 2147483648, MULTIPLIER = 2, START_LEN = 2;
+const int MULTIPLIER = 2, START_LEN = 32;
 
 
 class CStack
@@ -18,13 +18,13 @@ class CStack
 		int pos;
 		int len;
 		void stack_resize(const int a);
-		int Stack_OK()const;
+		bool Stack_OK()const;
 	public:
 		CStack();
 		~CStack();
 		void push(const T in);
 		void pop (T& out);
-		int is_empty()const;
+		bool is_empty()const;
 		void Stack_Dump()const;
         void Assert_OK ()const;
 };
