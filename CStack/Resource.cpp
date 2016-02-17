@@ -8,8 +8,8 @@
 
 int CStack::Stack_OK()const
 {
-    return ((data == NULL) || (len > MAX_LENGTH)) ? 1 : 0;
-}
+    return ((data == NULL) || (len > MAX_LENGTH)) ? 1 : 0; //there are more options when stack is not ok. E.g., Conditions with pos. 
+}//Why length of stack cann't be more then MAX_LENGTH. What for do you limit it?
 
 
 void CStack::Assert_OK()const
@@ -18,7 +18,7 @@ void CStack::Assert_OK()const
     {
         Stack_Dump();
         assert(!"Bad object CStack");
-        exit(-1);
+        exit(-1);//you don't need this. assert will exit anyway
     }
 }
 
@@ -34,7 +34,7 @@ CStack::~CStack()
 //________________________________________________________
 int CStack::is_empty()const
 {
-    return (pos == 0) ? 0 : 1;
+    return (pos == 0) ? 0 : 1;// when pos==0 it should return 1, cause it is empty. It may be clearer to use bool. It exists in c++. 
 }
 
 //__________________________________________________________
@@ -47,19 +47,19 @@ void CStack::Stack_Dump()const
         for (int i = 0; i < pos; i++)
             cout<<data[i]<<" data["<<i<<"]\n";
         cout<<"Number of elements = "<<pos<<endl;
-    }
+    }//also might help addresses of object and data
 }
 //_____________________________________________________________
-void CStack::stack_resize (const int a)
+void CStack::stack_resize (const int a)//for future. it's better comment what the parametr stands for.  
 {
     Assert_OK();
-    if ((a == 0) && (pos > 3*(len)/8))
-        data = (T*)realloc (data, (len*sizeof(T))/2);
+    if ((a == 0) && (pos > 3*(len)/8))//you need change len too here.
+        data = (T*)realloc (data, (len*sizeof(T))/2); //it's better to check != null after allocations. It might help finding errors 
     if (a == 1)
     {
         len *= MULTIPLIER;
-        data = (T*)realloc (data, len*sizeof(T));
-    }
+        data = (T*)realloc (data, len*sizeof(T));//and not good to use realloc here, cause it won't call contructors for T if it's class
+    }// It's better to use new here(but you need copy your data in new array). I hope Ilya Ded will tell you about opertor new.
     Assert_OK();
 }
 //_______________________________________________________________
