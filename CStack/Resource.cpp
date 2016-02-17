@@ -1,13 +1,14 @@
 
 #include "CStack.h"
 
-
-
+// Add also counting the number of existing stacks.
+// You can also make some limit of working stack objects. 
+// Also you can add methods top and size to make your stack similar to STL one. 
 
 bool CStack::Stack_OK()const
 {
-    return ((data == NULL) || (pos < 0)); //there are more options when stack is not ok. E.g., Conditions with pos.
-}//Why length of stack cann't be more then MAX_LENGTH. What for do you limit it?
+    return ((data == NULL) || (pos < 0)); //is that all? Check for len < 0, also it should check limits of pos. Ilya Ded told also about this == NULL.  
+}					  //think more about ok. It's important part.
 
 
 void CStack::Assert_OK()const
@@ -20,7 +21,7 @@ void CStack::Assert_OK()const
 }
 
 CStack::CStack() : data(new T[START_LEN]), pos (0), len(START_LEN)
-{}
+{}//you can add in constructor and destructor some helpful logs in debug mode
 CStack::~CStack()
 {
 	delete[] data;
@@ -31,8 +32,8 @@ CStack::~CStack()
 //________________________________________________________
 bool CStack::is_empty()const
 {
-    return (pos == 0) ? true : false;// when pos==0 it should return 1, cause it is empty. It may be clearer to use bool. It exists in c++.
-}
+    return (pos == 0) ? true : false;
+}//also it is empty when pos of len < 0. And dump doesn't say anything about it. 
 
 //__________________________________________________________
 void CStack::Stack_Dump()const
@@ -42,7 +43,7 @@ void CStack::Stack_Dump()const
     else
     {
         for (int i = 0; i < pos; i++)
-            cout<<data[i]<<" data["<<i<<"] address "<<&data + i<<endl;
+            cout<<data[i]<<" data["<<i<<"] address "<<&data + i<<endl;//I meant only the address of data and stack, not all elements' adresses
         cout<<"Number of elements = "<<pos<<endl;
     }//also might help addresses of object and data
 }
@@ -64,7 +65,7 @@ void CStack::stack_resize (const int a)// a shows the type of resize: contractio
             temp[i] = data[i];
         delete[] data;
         data = temp;
-    //  data = (T*)realloc (data, len*sizeof(T)); //it's better to check != null after allocations. It might help finding error
+    //  data = (T*)realloc (data, len*sizeof(T)); 
     }
 
     if (a == 1)
@@ -77,11 +78,11 @@ void CStack::stack_resize (const int a)// a shows the type of resize: contractio
             exit(-1);
         }
         for (int i = 0; i < len/MULTIPLIER; i++)
-            temp[i] = data[i];
-        delete[] data;
+            temp[i] = data[i]; //doesn't it duplicate code from contraction? You may first determine len of new stack  
+        delete[] data;	       // then copy data from old to new.	
         data = temp;
-      //data = (T*)realloc (data, len*sizeof(T));//and not good to use realloc here, cause it won't call contructors for T if it's class
-    }// It's better to use new here(but you need copy your data in new array). I hope Ilya Ded will tell you about opertor new.
+      //data = (T*)realloc (data, len*sizeof(T));
+      }
     Assert_OK();
 }
 //_______________________________________________________________
