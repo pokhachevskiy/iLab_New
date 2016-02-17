@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 void is_ok_string (char* str)
 {
     int i = 0;
@@ -65,6 +66,7 @@ int main()
             fprintf(out, "%s", number);
         }
         fprintf(out,"\n");
+
         fprintf(out,"\n");
         ch = fgetc(in);
         if (ch == EOF)
