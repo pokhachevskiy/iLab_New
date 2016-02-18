@@ -2,12 +2,12 @@
 #include "CStack.h"
 
 // Add also counting the number of existing stacks.
-// You can also make some limit of working stack objects. 
-// Also you can add methods top and size to make your stack similar to STL one. 
+// You can also make some limit of working stack objects.
+// Also you can add methods top and size to make your stack similar to STL one.
 
 bool CStack::Stack_OK()const
 {
-    return ((data == NULL) || (pos < 0)); //is that all? Check for len < 0, also it should check limits of pos. Ilya Ded told also about this == NULL.  
+    return ((data == NULL) || (pos < 0) || (this == NULL) || (len < 0) || (pos > len)); //is that all? Check for len < 0, also it should check limits of pos. Ilya Ded told also about this == NULL.
 }					  //think more about ok. It's important part.
 
 
@@ -32,8 +32,8 @@ CStack::~CStack()
 //________________________________________________________
 bool CStack::is_empty()const
 {
-    return (pos == 0) ? true : false;
-}//also it is empty when pos of len < 0. And dump doesn't say anything about it. 
+    return ((pos <= 0) || (len <= 0) ? true : false;
+}//also it is empty when pos of len < 0. And dump doesn't say anything about it.
 
 //__________________________________________________________
 void CStack::Stack_Dump()const
@@ -43,7 +43,8 @@ void CStack::Stack_Dump()const
     else
     {
         for (int i = 0; i < pos; i++)
-            cout<<data[i]<<" data["<<i<<"] address "<<&data + i<<endl;//I meant only the address of data and stack, not all elements' adresses
+            cout<<data[i]<<" data["<<i<<"] "<<endl;
+        cout<<"Addresses: &data = "<<&data<<", &this = "<<&this<<endl; //I meant only the address of data and stack, not all elements' adresses
         cout<<"Number of elements = "<<pos<<endl;
     }//also might help addresses of object and data
 }
@@ -65,7 +66,7 @@ void CStack::stack_resize (const int a)// a shows the type of resize: contractio
             temp[i] = data[i];
         delete[] data;
         data = temp;
-    //  data = (T*)realloc (data, len*sizeof(T)); 
+    //  data = (T*)realloc (data, len*sizeof(T));
     }
 
     if (a == 1)
@@ -78,8 +79,8 @@ void CStack::stack_resize (const int a)// a shows the type of resize: contractio
             exit(-1);
         }
         for (int i = 0; i < len/MULTIPLIER; i++)
-            temp[i] = data[i]; //doesn't it duplicate code from contraction? You may first determine len of new stack  
-        delete[] data;	       // then copy data from old to new.	
+            temp[i] = data[i]; //doesn't it duplicate code from contraction? You may first determine len of new stack
+        delete[] data;	       // then copy data from old to new.
         data = temp;
       //data = (T*)realloc (data, len*sizeof(T));
       }
