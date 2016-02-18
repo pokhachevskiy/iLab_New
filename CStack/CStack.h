@@ -19,6 +19,7 @@ class CStack
 		int len;
 		void stack_resize(const int a);
 		bool Stack_OK()const;
+		static int number; // number of active Stacks
 	public:
 		CStack();
 		~CStack();
@@ -28,6 +29,7 @@ class CStack
 		void Stack_Dump()const;
         void Assert_OK ()const;
 };
+
 
 
 
