@@ -116,7 +116,6 @@ void CStack::pop(T& out)
 //I think it will be useful to get the information from stack by index
 T& CStack::operator[](const int temp_pos)
 {
-    if (is_empty())
     if ((is_empty()) || (temp_pos < 0) || (temp_pos > pos))
     {
         cout<<"Irregular index or Stack is empty\n"<<endl;
