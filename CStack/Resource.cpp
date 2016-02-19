@@ -113,3 +113,53 @@ void CStack::pop(T& out)
     Assert_OK();
 }
 //_______________________________________________________
+//I think it will be useful to get the information from stack by index
+T& CStack::operator[](const int temp_pos)
+{
+    if (is_empty())
+    if ((is_empty()) || (temp_pos < 0) || (temp_pos > pos))
+    {
+        cout<<"Irregular index or Stack is empty\n"<<endl;
+        exit(-1);
+    }
+    return data[temp_pos];
+}
+
+
+
+T& CStack::top()
+{
+    Assert_OK();
+    if (is_empty())
+    {
+        cout<<"Stack is Empty!\n";
+        exit(-1);
+    }
+    else
+        return data[pos - 1];
+}
+//I don't know why, but STL Stack has two functions top, I think they just for different calls of this functions:
+//first const for outing the information without changing, while the second is for change the var by the link
+const T& CStack::top()const
+{
+    Assert_OK();
+    if (is_empty())
+    {
+        cout<<"Stack is Empty!\n";
+        exit(-1);
+    }
+    else
+        return data[pos - 1];
+}
+const int CStack::size()const
+{
+    Assert_OK();
+    if (is_empty())
+        return 0;
+    else
+        return pos;
+}
+
+
+
+

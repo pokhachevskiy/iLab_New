@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <conio.h>
 const int STACK_MAX_SIZE = 100;
-typedef char T;
+typedef int T;
 using namespace std;
 const int MULTIPLIER = 2, START_LEN = 32;
 
@@ -28,6 +28,10 @@ class CStack
 		bool is_empty()const;
 		void Stack_Dump()const;
         void Assert_OK ()const;
+        T& top();
+        const T& top()const;
+        const int size()const;
+        T& operator[](const int temp_pos);
 };
 
 
