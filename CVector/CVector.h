@@ -18,8 +18,8 @@ class CVector
         CVector operator ! ();
         void operator += (CVector a);
         void operator -= (CVector a);
-        const CVector operator + (CVector b);
-        const CVector operator - (CVector b);
+        CVector operator + (CVector b)const;
+        CVector operator - (CVector b)const;
         CVector operator * (double h);
         long double operator  ^ (CVector b)const;
         friend std::istream& operator>> (std::istream& s, CVector& temp);
