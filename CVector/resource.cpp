@@ -36,13 +36,13 @@ void CVector::   operator -= (CVector a)
     for (unsigned int i = 0; i < N; i++)
         coord[i] -= a.coord[i];
 }
-CVector CVector::operator + (CVector b)
+const CVector CVector::operator + (CVector b)
 {
     CVector temp = *this;
     temp += b;
     return temp;
 }
-CVector CVector::operator - (CVector b)
+const CVector CVector::operator - (CVector b)
 {
     CVector temp = *this;
     temp -= b;
