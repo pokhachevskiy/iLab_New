@@ -49,7 +49,7 @@ CVector CVector::operator - (CVector b)const
     return temp;
 
 }
-CVector CVector::operator * (double h)
+CVector CVector::operator * (double h)const
 {
     CVector temp;
     temp = *this;
