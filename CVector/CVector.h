@@ -20,7 +20,7 @@ class CVector
         void operator -= (CVector a);
         CVector operator + (CVector b)const;
         CVector operator - (CVector b)const;
-        CVector operator * (double h);
+        CVector operator * (double h)const;
         long double operator  ^ (CVector b)const;
         friend std::istream& operator>> (std::istream& s, CVector& temp);
         friend std::ostream& operator<< (std::ostream& s, const CVector& temp);
