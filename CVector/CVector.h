@@ -6,7 +6,8 @@
 //using namespace std;
 const unsigned int N = 2; // dim of vector space
 
-
+//vector can be broken too. Add method ok as private.
+//dump too.
 class CVector
 {
     private:
@@ -21,7 +22,7 @@ class CVector
         CVector operator + (CVector b)const;
         CVector operator - (CVector b)const;
         CVector operator * (double h)const;
-        long double operator  ^ (CVector b)const;
+        long double operator  ^ (CVector b)const;//you can use * here. the parameter differs from prev one.
         friend std::istream& operator>> (std::istream& s, CVector& temp);
         friend std::ostream& operator<< (std::ostream& s, const CVector& temp);
 };
