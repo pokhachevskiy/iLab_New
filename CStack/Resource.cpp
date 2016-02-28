@@ -6,7 +6,7 @@ int CStack::number = 0;
 // You can also make some limit of working stack objects.
 // Also you can add methods top and size to make your stack similar to STL one.
 
-bool CStack::Stack_OK()const
+bool CStack::Stack_OK()const//it should say true, when it's ok. 
 {
     return ((data == NULL) || (pos < 0) || (this == NULL) || (len < 0) || (pos > len)); //is that all? Check for len < 0, also it should check limits of pos. Ilya Ded told also about this == NULL.
 }					  //think more about ok. It's important part.
@@ -29,7 +29,7 @@ CStack::CStack() : data(new T[START_LEN]), pos (0), len(START_LEN)
         char* key = new char[100];
         cout<<"You haven't bought this program yet. Enter the license key to open the full functions of program!\n Enter the key>> ";
         cin>>key;
-        if (strcmp("Xpe79qa81v\0", key))
+        if (strcmp("Xpe79qa81v\0", key))//unsafe function. It's vulnerable to bufferoverflow.
         {
             cout<<"The key isn't correct!"<<endl;
             exit(-1);
