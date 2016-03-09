@@ -5,7 +5,7 @@
 int main()
 {
     int ch = 0, out = 0;
-    CStack temp, temp1, temp2;
+    CStack temp, temp1, temp2, temp3;
     cin>>ch;
     temp.push(ch);
     cin>>ch;

@@ -57,7 +57,7 @@ CVector CVector::operator * (double h)const
         temp.coord[i] *= h;
     return temp;
 }
-long double CVector:: operator ^ (CVector b)const
+long double CVector:: operator * (CVector b)const
 {
     long double res = 0.0;
     for (unsigned int i = 0; i < N; i++)
@@ -76,4 +76,8 @@ std::ostream& operator << (std::ostream& s, const CVector& temp)
     for (unsigned int i = 0; i < N; i++)
         s<<temp.coord[i]<<" ";
     return s;
+}
+bool CVector::Vector_OK()
+{
+
 }
