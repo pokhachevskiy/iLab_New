@@ -9,7 +9,10 @@ class CFile
     private:
         FILE* cfile = NULL;
     public:
+        operator FILE* ()const
+        {
 
+        }
 
 
 
