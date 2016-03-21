@@ -5,6 +5,10 @@
 #include <assert.h>
 #define TPL template<typename T>
 
+//---------COMMENTS-------------
+//Add operator[], addressing to components 
+//Add core functions, like on lecture was said. And functions such as operator*(Vector, Vector) will be outside or operator+()
+
 #define Assert_OK()\
 if (!Vector_OK())\
 {\
@@ -36,13 +40,13 @@ class CVector
         CVector<T> operator * (double h)const;
         void operator = (const CVector<T>& b);
         T operator  * (CVector b)const;//you can use * here. the parameter differs from prev one.
-        template <typename T_>
+        template <typename T_>//why do you need another type? It should work with main template.
         friend std::istream& operator>> (std::istream& s, CVector<T_>& temp);
         template <typename T_>
         friend std::ostream& operator<< (std::ostream& s, const CVector<T_>& temp);
         bool is_empty()const;
         void Dump()const;
-        void foo();
+        void foo(); //strange function
       //  void Assert_OK()const;
 };
 
@@ -52,7 +56,7 @@ bool CVector<T>::Vector_OK()const
     return (coord && this) ? true : false;
 }
 TPL
-bool CVector<T>::is_empty()const
+bool CVector<T>::is_empty()const//what does the empty vector mean?
 {
     bool temp = true;
     for (unsigned int i = 0; i < N; i++)
@@ -60,7 +64,7 @@ bool CVector<T>::is_empty()const
         {
             return false;
         }
-    return temp;
+    return temp;//you don't change temp, anywhere.
 }
 
 TPL
