@@ -69,7 +69,7 @@ void CStack::stack_resize (const int a)// a shows the type of resize: 0 for cont
 {
     Assert_OK();
     int new_len = len;
-    if ((a == 0) && (pos > 3*(len)/8))
+    if ((a == 0) && (pos < 3*(len)/8))
         new_len /= MULTIPLIER;
     if (a == 1)
         new_len *= MULTIPLIER;

@@ -53,7 +53,7 @@ class CVector
 TPL
 bool CVector<T>::Vector_OK()const
 {
-    return (coord && this) ? true : false;
+    return (coord && this);
 }
 TPL
 bool CVector<T>::is_empty()const//what does the empty vector mean?

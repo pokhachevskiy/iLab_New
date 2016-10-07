@@ -1,8 +1,14 @@
 #include "CVector.h"
+#define Assert_OK()\
+if (!Vector_OK())\
+{\
+    Dump();\
+    assert(!"Bad object CVector");\
+}
 
 bool CVector::Vector_OK()const
 {
-    return (this) ? true : false;
+    return (coord && this) ? true : false;
 }
 bool CVector::is_empty()const
 {
@@ -18,6 +24,8 @@ bool CVector::is_empty()const
 
 void CVector::Dump()const
 {
+    if (!coord)
+        assert("Very bad object CVector");
     if (is_empty() == true)
         std::cout<<"Vector is Empty!\n";
     else
@@ -28,14 +36,14 @@ void CVector::Dump()const
         std::cout<<"Dim = "<<N<<std::endl;
     }
 }
-void CVector::Assert_OK()const
+/*void CVector::Assert_OK()const
 {
     if (!Vector_OK())
     {
         Dump();
-        assert(!"Bad object CStack");
+        assert(!"Bad object CVector");
     }
-}
+} */
 
 
 CVector::CVector()

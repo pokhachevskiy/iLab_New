@@ -5,7 +5,6 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
-//_____________________________________________________2147483648
 const unsigned int MAX_LENGTH = 2147483648, MULTIPLIER = 2, START_LEN = 32;
 typedef char T;
 typedef struct Stack_tag
@@ -14,7 +13,8 @@ typedef struct Stack_tag
     int pos;
     int len;
 } Stack_t;
-//____________________________________________________
+
+
 typedef enum
 {
 	STACK_OVERFLOW,
@@ -22,23 +22,27 @@ typedef enum
 	STACK_NOT_WORK,
 	NO_ERROR
 } code_error;
-//_____________________________________________________
+
+
 typedef struct
 {
-	char* message;// = NULL;
-	code_error code;// = NO_ERROR;
+	char* message;
+	code_error code;
 } Error;
-//________________________________________________________
+
+
 int is_ok(Stack_t* stack)
 {
     return ((stack == NULL) || (stack->data == NULL) || (stack->len > MAX_LENGTH)) ? 1 : 0;
 }
-//________________________________________________________
+
+
 int is_empty(Stack_t* stack)
 {
     return (stack->pos == 0) ? 0 : 1;
 }
-//________________________________________________________
+
+
 Error* my_error_ctor ()
 {
     Error* This = (Error*)malloc(sizeof(Error));
@@ -47,7 +51,8 @@ Error* my_error_ctor ()
     This->message = NULL;
     return This;
 }
-//_________________________________________________________
+
+
 
 void my_error_dtor (Error *This)
 {
@@ -55,7 +60,8 @@ void my_error_dtor (Error *This)
    free(This->message);
    This->message = NULL;
 }
-//__________________________________________________________
+
+
 Error dump(Stack_t* stack)
 {
     Error *err_temp = NULL;
@@ -84,7 +90,8 @@ Error dump(Stack_t* stack)
             return *err_temp;
         }
 }
-//_____________________________________________________________
+
+
 Error stack_resize (Stack_t *stack, const char a)
 {
     Error *err_temp;
@@ -117,7 +124,9 @@ Error stack_resize (Stack_t *stack, const char a)
 
     return *err_temp;
 }
-//_______________________________________________________________
+
+
+
 Error push(Stack_t *stack, T in)
 {
     Error *err_temp = NULL;
@@ -152,7 +161,9 @@ Error push(Stack_t *stack, T in)
 
     return *err_temp;
 }
-//_____________________________________________________
+
+
+
 Error pop(Stack_t *stack, T* out)
 {
     Error *err_temp = NULL;
@@ -179,7 +190,8 @@ Error pop(Stack_t *stack, T* out)
 
     return *err_temp;
 }
-//_____________________________________________________
+
+
 
 Stack_t* my_stack_ctor()
 {
@@ -190,7 +202,8 @@ Stack_t* my_stack_ctor()
     (*temp_stack).len = START_LEN;
     return temp_stack;
 }
-//_______________________________________________________
+
+
 Error my_stack_dtor(Stack_t* stack)
 {
     Error *err_temp = NULL;
@@ -211,7 +224,8 @@ Error my_stack_dtor(Stack_t* stack)
         return *err_temp;
     }
 }
-//_____________________________________________
+
+
 int init(Stack_t* stack)
 {
 
@@ -226,6 +240,6 @@ int init(Stack_t* stack)
         return (stack->data == NULL) ? 1 : 0;
     }
 }
-//________________________________________________
+
 #endif
 
