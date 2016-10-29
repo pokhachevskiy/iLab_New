@@ -45,6 +45,7 @@ class Array
                 return reverse_iterator(data_);
             return reverse_iterator(data_ + pos - 1);
         }
+
         reverse_iterator rend()const
         {
             if (!pos)
@@ -115,6 +116,21 @@ class Array
             return pos;
         }
 };
+
+
+
+template <typename typeIterator>
+void customSort (typeIterator first, typeIterator last)
+{
+    for (auto i = first; i != (last - 1); ++i)
+        for (auto j = i + 1; j != (last); ++j)
+            if (*i >= *j)
+                std::swap(*i, *j);
+}
+
+
+
+
 TPL
 void Array<T>::copy(const Array<T>& that)
 {
@@ -146,6 +162,7 @@ class Array<T>::iterator
             ++vec_pointer;
             return *this;
         }
+
         iterator& operator-- ()
         {
             --vec_pointer;
@@ -175,6 +192,10 @@ class Array<T>::iterator
         iterator operator + (const size_t& ind)const
         {
             return vec_pointer + ind;
+        }
+        iterator operator - (const size_t& ind)const
+        {
+            return vec_pointer - ind;
         }
 };
 
