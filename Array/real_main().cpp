@@ -1,34 +1,17 @@
 #include <cassert>
 #include <iostream>
+#include <vector>
+#include "Array.hpp"
 
 
-/// Задание по курсу. Написать свой небольшой аналог std::vector.
-/// Реализовать класс хранения данных, поддерживающий необходимые операции.
-/// В том числе нужно сделать класс исключений и итератор.
-///
-/// Для примера работы программы можно установить значение USE_STL_VECTOR
-/// равным единице. Тогда программа будет использовать стандартную библиотеку.
-///
-/// Ваша программа должна работать, когда USE_STL_VECTOR равно нулю.
-/// Если вы делаете реализацию с шаблонами, поставьте
-/// USE_TEMPLATED_REALIZATION равным единице, если реализацию с int -- нулю.
-///
-/// Как можно видеть, ваш класс должен быть расположен в файле "Array.hpp"
-/// и находиться в той же папке, где и данный файл.
-/// Тогда для компиляции можно использовать, к примеру
-/// "g++ -std=c++11 -Wall testArray.cpp -o testArray"
-///
-/// Класс-хранилище должен называться Array (независимо от шаблонности),
-/// класс для исключений должен называться Exception,
-/// класс итератора должен быть объявлен внутри Array,
-/// обычный итератор называется iterator,
-/// итератор в обратном порядке -- reverse_iterator
 
 
+using std::cout;
+using std::endl;
+
+/*
 #define USE_STL_VECTOR 0
 #define USE_TEMPLATED_REALIZATION 1
-
-
 #if USE_STL_VECTOR
 
 #include <vector>
@@ -170,14 +153,24 @@ void testIterationConstness() {
 	const IntArray b = a;
 
 }
+*/
 
 
+int main()
+{
+    const size_t N = 15;
+    Array<int> a(N);
 
-int main() {
+     for (auto& i:a)
+        i = rand() % N;
 
-    IntArray a = {1, 8, 4, 5, 3};
-    customSort(a.begin(), a.end());
-    for (auto i = a.begin(); i != a.end(); ++i)
-        std::cout << *i << std::endl;
-	return 0;
+    for (auto i:a)
+        cout<<i << " ";
+    cout<< endl;
+    RuntimeLess<int> runtimeless;
+    runtimeless.inverse = 1;
+    MergeSort(a.begin(), a.end(), [](int& a, int& b) { return a < b;});
+    for (auto i:a)
+        cout<< i << " ";
+    return 0;
 }

@@ -7,10 +7,32 @@
 #define TPL template<typename T>
 const int MULTIPLIER = 2;
 
-
 /*
 = -, == +, != +, < +, <= +, >+, >= +, []+. Функцию assign +, insert - , push_back+, pop_back+, clear+, at+.
 */
+//exception handling
+class Exception: public std::exception
+{
+    private:
+        const char* ex_str;
+    public:
+        Exception()
+        {}
+        Exception(const char* str)
+        {
+            ex_str = str;
+        }
+
+        virtual ~Exception() throw()
+        {}
+
+        const char *what() const throw()
+        {
+            return ex_str;
+        }
+};
+////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -27,8 +49,12 @@ class Array
         void Assert_OK()const;
         void copy(const Array<T>& that);
     public:
+        //iterator classes
         class iterator;
         class reverse_iterator;
+        ////////////////////////
+
+        //array's iterators
         iterator begin()const
         {
             iterator that(data_);
@@ -52,9 +78,9 @@ class Array
                 return reverse_iterator(data_);
             return reverse_iterator(data_ - 1);
         }
+        ////////////////////////
 
-
-
+        //constructors // COW
         Array<T> (); //
         Array<T> (std::initializer_list<T> inp);
         Array<T> (size_t pos_, size_t value): data_(new T[pos_]), pos(0), size_(pos_)
@@ -64,8 +90,10 @@ class Array
         Array<T> (const Array<T>& that);
         explicit Array<T> (size_t INIT_size); //
         ~Array<T> ();
+        Array<T>& operator = (const Array<T>& vec);
+        ////////////////////////
 
-
+        //insert and assign methods
         void assign(size_t count, const T& value ); // first count values with value
         void assign(std::initializer_list<T> inp)
         {
@@ -80,33 +108,44 @@ class Array
                 push_back(*iter);
             ////////////
         }
-
         void insert( const iterator& posit, size_t count, const T& value ); //from posit insert count position with value
+        void insert( const iterator& posit, const iterator& beg, const iterator& end);
+        ////////////////////////
 
-        void clear();
+
+        //push/pop
         void push_back( const T& value ); //input elem to the end
         void pop_back(); //just pop last element delete it and so
+        ////////////////////////
+
+
+        //reference to elements
+        const T& operator [] (const size_t ind)const;
+        T& operator [] (const size_t ind);
         const T& at( size_t posisiton )const;
         T& at (size_t pos)
         {
             return (*this)[pos];
         }
-        bool Vector_OK()const;
+        ////////////////////////
 
-
-        const T& operator [] (const size_t ind)const;
-        bool is_empty()const;
-        T& operator [] (const size_t ind);
-        void Array_Dump()const;
-        Array<T>& operator = (const Array<T>& vec);
+        //overloaded operators
         bool operator == (const Array<T>& that)const;
         bool operator < (const Array<T>& that)const;
         bool operator > (const Array<T>& that)const;
         bool operator >= (const Array<T>& that)const;
         bool operator <= (const Array<T>& that)const;
         bool operator != (const Array<T>& that)const;
-        //friend CVector<T> operator + <> (const CVector<T>& lhs, const CVector<T>& rhs);
-        //friend CVector<T> operator * <> (const CVector<T>& vec, int num);
+        ////////////////////////
+
+        //Debug checks and infos
+        bool Vector_OK()const;
+        void Array_Dump()const;
+        ////////////////////////
+
+        //other
+        bool is_empty()const;
+        void clear();
         size_t capacity()const
         {
             return size_;
@@ -115,38 +154,11 @@ class Array
         {
             return pos;
         }
+        ////////////////////////
 };
+////////////////////////////////////////////////////////////////////////
 
-
-
-template <typename typeIterator>
-void customSort (typeIterator first, typeIterator last)
-{
-    for (auto i = first; i != (last - 1); ++i)
-        for (auto j = i + 1; j != (last); ++j)
-            if (*i >= *j)
-                std::swap(*i, *j);
-}
-
-
-
-
-TPL
-void Array<T>::copy(const Array<T>& that)
-{
-    delete[] data_;
-    pos = that.pos;
-    data_ = new T[size_ = that.size_];
-    auto th_it = begin();
-    for (auto it = that.begin(); it != that.end(); ++it, ++th_it)
-    {
-        *th_it = *it;
-    }
-}
-
-
-
-
+//iterator classes
 TPL
 class Array<T>::iterator
 {
@@ -155,6 +167,7 @@ class Array<T>::iterator
     public:
         iterator(): vec_pointer(nullptr)
         {}
+        using value_type = T;
         iterator(T* ptr): vec_pointer(ptr)
         {}
         iterator& operator++ ()
@@ -168,6 +181,19 @@ class Array<T>::iterator
             --vec_pointer;
             return *this;
         }
+        iterator operator-- (int in)
+        {
+            iterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        iterator operator++ (int in)
+        {
+            iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
         T& operator*()
         {
             return *vec_pointer;
@@ -176,6 +202,10 @@ class Array<T>::iterator
         {
             return vec_pointer;
         }
+       // T* get()
+       // {
+        //    return vec_pointer;
+        //}
         void operator = (const iterator& that)
         {
             vec_pointer = that.vec_pointer;
@@ -196,28 +226,6 @@ class Array<T>::iterator
         iterator operator - (const size_t& ind)const
         {
             return vec_pointer - ind;
-        }
-};
-
-
-class Exception: public std::exception
-{
-    private:
-        const char* ex_str;
-    public:
-        Exception()
-        {}
-        Exception(const char* str)
-        {
-            ex_str = str;
-        }
-
-        virtual ~Exception() throw()
-        {}
-
-        const char *what() const throw()
-        {
-            return ex_str;
         }
 };
 
@@ -267,7 +275,57 @@ class Array<T>::reverse_iterator
             return vec_pointer - ind;
         }
 };
+////////////////////////////////////////////////////////////////////////
 
+//constructors // COW
+TPL
+Array<T>::Array(size_t INIT_size): pos(INIT_size)
+{
+    size_ = (INIT_size);
+    if (INIT_size <= 0)
+        throw (Exception("Out of range in Constructor with INIT_size <= 0"));
+    else
+        data_ = new T[INIT_size];
+    //for (auto i : (*this))
+    for (iterator i = begin(); i != end(); ++i)
+        *i = T(NULL);
+
+}
+
+TPL
+Array<T>::Array (const Array<T>& that)
+{
+    size_ = that.size_;
+    pos = that.pos;
+    data_ = new T[that.size_];
+    auto th_it = begin();
+    for (auto it = that.begin(); it != that.end(); ++it, ++th_it)
+    {
+        *th_it = *it;
+    }
+    Assert_OK();
+}
+
+TPL
+Array<T>::Array(std::initializer_list<T> inp):data_(new T[inp.size()]), pos(0), size_(inp.size())
+{
+    for (auto iter = inp.begin(); iter != inp.end(); ++iter)
+        push_back(*iter);
+}
+
+TPL
+Array<T>::Array(): pos(0), size_(INIT_SIZE)
+{
+    data_ = new T[INIT_SIZE];
+}
+
+TPL
+Array<T>::~Array()
+{
+    delete[] data_;
+    pos = 0;
+    size_ = 0;
+}
 
 TPL
 Array<T>& Array<T>::operator = (const Array<T>& vec)
@@ -276,26 +334,105 @@ Array<T>& Array<T>::operator = (const Array<T>& vec)
         copy(vec);
     return *this;
 }
+////////////////////////////////////////////////////////////////////////
+
+//insert and assign methods
 TPL
 void Array<T>::insert( const iterator& posit, size_t count, const T& value )
 {
-    if (posit.get() >= end().get())
-        assign(count, value);
-    else
+    Array<T> res(pos + count);
+    res.clear();
+    for (auto it = begin(); it != posit; ++it)
     {
-        Array<T> res(size_ + count);
-        for (auto it = begin(); it != posit; ++it)
-            res.push_back(*it);
-
-        res.assign(count, value);
-
-        for (auto it = posit; it != end(); ++it)
-            res.push_back(*it);
-        *this = res;
+        res.push_back(*it);
     }
+    //res.assign(count, value);
+    for (size_t i = 0; i < count; i++)
+        res.push_back(value);
+    for (auto it = posit; it != end(); ++it)
+        res.push_back(*it);
+    *this = res;
 }
 
+TPL
+void Array<T>::insert( const iterator& posit, const iterator& beg, const iterator& last)
+{
+    Array<T> res(pos + distance(beg, last));
+    res.clear();
+    for (auto it = begin(); it != posit; ++it)
+    {
+         res.push_back(*it);
+    }
+    for (auto out_iter = beg; out_iter != last; out_iter++)
+    {
+        res.push_back(*out_iter);
+    }
+    for (auto it = posit; it != end(); ++it)
+        res.push_back(*it);
+    *this = res;
+}
 
+TPL
+void Array<T>::assign( const size_t count, const T& value)
+{
+    clear();
+    for (size_t i = 0; i < count; i++)
+        push_back(value);
+}
+////////////////////////////////////////////////////////////////////////
+
+//push/pop
+TPL
+void Array<T>::push_back( const T& value )
+{
+    Assert_OK();
+    if (pos == size_)
+        Vector_resize(1);
+    data_[pos++] = value;
+    Assert_OK();
+}
+
+TPL
+void Array<T>::pop_back()
+{
+    Assert_OK();
+    if (pos == 0)
+    {
+        std::cout<<"Vector IS UNDERFLOW\n";
+        exit(-1);
+    }
+    data_[--pos] = (T)NULL;
+
+    Vector_resize(0);
+    Assert_OK();
+}
+////////////////////////////////////////////////////////////////////////
+
+//reference to elements
+TPL
+const T& Array<T>::at( size_t position )const
+{
+    return (*this)[position];
+}
+
+TPL
+const T& Array<T>::operator [] (const size_t ind)const
+{
+    if ((is_empty()) || (ind < 0) || (ind >= pos))
+        throw (Exception("Out of range, operator [] or at"));
+    return data_[ind];
+}
+
+TPL
+T& Array<T>::operator [] (const size_t ind)
+{
+    if ((is_empty()) || (ind < 0) || (ind >= pos))
+        throw (Exception("Out of range, operator [] or at"));
+    return data_[ind];
+}
+////////////////////////////////////////////////////////////////////////
+
+//overloaded operators
 TPL
 bool Array<T>::operator < (const Array<T>& that)const
 {
@@ -320,17 +457,11 @@ bool Array<T>::operator < (const Array<T>& that)const
 }
 
 TPL
-void Array<T>::assign( const size_t count, const T& value )
-{
-    clear();
-    for (size_t i = 0; i < count; i++)
-        push_back(value);
-}
-TPL
 bool Array<T>::operator > (const Array<T>& that)const
 {
     return (that < *this);
 }
+
 TPL
 bool Array<T>::operator >= (const Array<T>& that)const
 {
@@ -357,93 +488,35 @@ bool Array<T>::operator == (const Array<T>& that)const
         }
     return (fl && (that.pos == pos));
 }
+
 TPL
 bool Array<T>::operator != (const Array<T>& that)const
 {
     return (!(*this == that));
 }
+////////////////////////////////////////////////////////////////////////
 
-
+//Debug and system methods
 TPL
-void Array<T>::push_back( const T& value )
+bool Array<T>::Vector_OK()const
 {
-    Assert_OK();
-    if (pos == size_)
-        Vector_resize(1);
-    data_[pos++] = value;
-    Assert_OK();
+    ////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //////////////////////
+    return (data_ && (!pos) && size_)||(!((data_ == NULL) || (pos < 0) || (this == NULL) || (size_ < 0) || (pos > size_)));
 }
 
 TPL
-void Array<T>::pop_back()
+void Array<T>::Assert_OK()const
 {
-    Assert_OK();
-    if (pos == 0)
+    if (!Vector_OK())
     {
-        std::cout<<"Vector IS UNDERFLOW\n";
-        exit(-1);
+        Array_Dump();
+        assert(!"Bad object Vector");
     }
-    data_[--pos] = (T)NULL;
-
-    Vector_resize(0);
-    Assert_OK();
-}
-
-//Constructors and destructor
-TPL
-Array<T>::Array(size_t INIT_size): pos(INIT_size)
-{
-    size_ = (INIT_size);
-    if (INIT_size <= 0)
-        throw (Exception("Out of range in Constructor with INIT_size <= 0"));
-    else
-        data_ = new T[INIT_size];
-    //for (auto i : (*this))
-    for (iterator i = begin(); i != end(); ++i)
-        *i = T(NULL);
-
-}
-TPL
-Array<T>::Array (const Array<T>& that)
-{
-    size_ = that.size_;
-    pos = that.pos;
-    data_ = new T[that.size_];
-    auto th_it = begin();
-    for (auto it = that.begin(); it != that.end(); ++it, ++th_it)
-    {
-        *th_it = *it;
-    }
-    Assert_OK();
-}
-
-
-TPL
-Array<T>::Array(std::initializer_list<T> inp):data_(new T[inp.size()]), pos(0), size_(inp.size())
-{
-    for (auto iter = inp.begin(); iter != inp.end(); ++iter)
-        push_back(*iter);
 }
 
 TPL
-Array<T>::Array(): pos(0), size_(INIT_SIZE)
-{
-    data_ = new T[INIT_SIZE];
-}
-
-TPL
-Array<T>::~Array()
-{
-    delete[] data_;
-    pos = 0;
-    size_ = 0;
-}
-//_________________________________________
-
-
-// a shows the type of resize: 0 for contraction and 1 for elongation
-TPL
-void Array<T>::Vector_resize (const int a)
+void Array<T>::Vector_resize (const int a)// a shows the type of resize: 0 for contraction and 1 for elongation
 {
 
     Assert_OK();
@@ -466,59 +539,19 @@ void Array<T>::Vector_resize (const int a)
     Assert_OK();
 }
 
-
 TPL
-const T& Array<T>::at( size_t position )const
+void Array<T>::copy(const Array<T>& that)
 {
-    return (*this)[position];
-}
-
-
-TPL
-void Array<T>::clear()
-{
-    pos = 0;
-}
-
-
-TPL
-const T& Array<T>::operator [] (const size_t ind)const
-{
-    if ((is_empty()) || (ind < 0) || (ind >= pos))
-        throw (Exception("Out of range, operator [] or at"));
-    return data_[ind];
-}
-TPL
-T& Array<T>::operator [] (const size_t ind)
-{
-    if ((is_empty()) || (ind < 0) || (ind >= pos))
-        throw (Exception("Out of range, operator [] or at"));
-    return data_[ind];
-}
-TPL
-bool Array<T>::Vector_OK()const
-{
-    ////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //////////////////////
-    return (data_ && (!pos) && size_)||(!((data_ == NULL) || (pos < 0) || (this == NULL) || (size_ < 0) || (pos > size_)));
-}
-TPL
-void Array<T>::Assert_OK()const
-{
-    if (!Vector_OK())
+    delete[] data_;
+    pos = that.pos;
+    data_ = new T[size_ = that.size_];
+    auto th_it = begin();
+    for (auto it = that.begin(); it != that.end(); ++it, ++th_it)
     {
-        Array_Dump();
-        assert(!"Bad object Vector");
+        *th_it = *it;
     }
 }
 
-TPL
-bool Array<T>::is_empty()const
-{
-    return ((pos <= 0) || (size_ <= 0));
-}
-
-//__________________________________________________________
 TPL
 void Array<T>::Array_Dump()const
 {
@@ -532,5 +565,87 @@ void Array<T>::Array_Dump()const
         std::cout<<"Number of elements = "<<pos<<std::endl;
     }
 }
+////////////////////////////////////////////////////////////////////////
+
+//other
+TPL
+void Array<T>::clear()
+{
+    pos = 0;
+}
+
+TPL
+bool Array<T>::is_empty()const
+{
+    return ((pos <= 0) || (size_ <= 0));
+}
+////////////////////////////////////////////////////////////////////////
+
+//sorts / Distance /Runtime struct
+TPL
+struct RuntimeLess
+{
+	/// Ответ будет зависеть от флага, выставляемого в момент исполнения программы
+	bool inverse = false;
+
+	bool operator()(const T& a, const T& b) const
+	{
+	    //std::cout << std::endl<< "I'm predicate left = "<<a<<", b = "<<b <<std::endl;
+		return inverse ? (a < b) : (a > b);
+	}
+};
+
+template <typename typeIterator, typename TPredicate>
+void customSort (typeIterator first, typeIterator last, TPredicate predicate)
+{
+    for (auto i = first; i != (last - 1); ++i)
+        for (auto j = i + 1; j != (last); ++j)
+            if (predicate(*i, *j))
+                std::swap(*i, *j);
+}
+
+template <typename typeIterator, typename TPredicate>
+Array<typename typeIterator::value_type> merge(const typeIterator begin, const typeIterator mid, const typeIterator end, TPredicate predicate)
+{
+    Array<typename typeIterator::value_type> buffer(distance(begin, end));
+    buffer.clear();
+    typeIterator it_l( begin ), it_r( mid );
+    const typeIterator it_mid( mid ), it_end( end );
+
+    while (it_l != it_mid && it_r != it_end)
+    {
+        buffer.push_back(predicate(*it_l, *it_r) ? *(it_l++)  : *(it_r++) );
+    }
+
+    buffer.insert(buffer.end(), it_l, it_mid);
+    buffer.insert(buffer.end(), it_r, it_end);
+
+    return buffer;
+}
+
+template <typename typeIterator, typename TPredicate>
+void MergeSort (typeIterator first, typeIterator last, TPredicate predicate)
+{
+    auto size = distance(first, last);
+    if (size < 2)
+        return;
+    auto mid = first + size/2;
+    MergeSort(first, mid, predicate);
+    MergeSort(mid, last, predicate);
+
+    auto &&buf = merge(first, mid, last, predicate);
+    for (auto iter = buf.begin(); iter != buf.end(); ++iter, ++first)
+        *first = *iter;
+}
+
+template <typename It>
+long distance (It first, It last)
+{
+    long n = 0;
+    while(last-- != first)
+        n++;
+    return n;
+}
+////////////////////////////////////////////////////////////////////////
 
 #endif // ARRAY_HPP_INCLUDED
