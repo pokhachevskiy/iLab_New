@@ -2,175 +2,186 @@
 #include <iostream>
 #include <vector>
 #include "Array.hpp"
-
-
-
+#include <cstdlib>
+#include <thread>
+#include <mutex>
+#include <algorithm>
+#define TPL template<typename T>
 
 using std::cout;
 using std::endl;
+using std::thread;
 
-/*
-#define USE_STL_VECTOR 0
-#define USE_TEMPLATED_REALIZATION 1
-#if USE_STL_VECTOR
-
-#include <vector>
-template<typename T>
-using Array = std::vector<T>;
-using IntArray = Array<int>;
-using Exception = std::exception;
-
-#else
-
-#include "Array.hpp"
-#if USE_TEMPLATED_REALIZATION
-using IntArray = Array<int>;
-#else
-using IntArray = Array;
-#endif
-
-#endif
-
-
-
-void testConstructorsAndAssignment() {
-	IntArray a;
-	IntArray b(10000);
-	IntArray c(5, 1);
-	IntArray d(b);
-	IntArray e({1, 1, 1, 1, 1});
-	assert(a.size() == 0);
-	assert(b == d);
-	assert(b.size() == 10000);
-	assert(c == e);
-
-
-	IntArray tmp = c;
-	b = c;
-	assert(b == c);
-	b = e;
-	assert(c == tmp);
-
-	b = b;
-	assert(b == e);
-}
-
-
-void testOperators() {
-	IntArray a = {1, 2, 3};
-	IntArray b = {1};
-	IntArray c = {2, 0, 0};
-
-	assert( !(a == b) );
-	assert(a != b);
-
-	assert(b < a);
-	assert(b <= a);
-	assert(c > a);
-	assert(c > b);
-}
-
-
-void testAccess() {
-	const IntArray a = {1, 2, 3};
-	assert(a[0] == 1); assert(a[1] == 2); assert(a[2] == 3);
-	assert(a.at(0) == 1); assert(a.at(1) == 2); assert(a.at(2) == 3);
-
-	IntArray b;
-	b.assign({7, 7, 7, 7, 7});
-	assert(b[4] == 7);
-	assert(b.at(4) == 7);
-	b.assign(a.begin(), a.end());
-
-	assert(b == a);
-	b.clear();
-	assert(b.size() == 0);
-}
-
-
-void testPushPop() {
-	IntArray a;
-	a.push_back(5);
-	a.push_back(6);
-	assert(a[0] == 5 && a[1] == 6);
-	a.pop_back();
-	assert(a.size() == 1);
-	a.pop_back();
-	assert(a.size() == 0);
-}
-
-
-void testIteration()
+////////////////
+TPL
+struct RuntimeLess
 {
-	IntArray a;
-	assert(a.begin() == a.end());
-	assert(a.rbegin() == a.rend());
+	/// Ответ будет зависеть от флага, выставляемого в момент исполнения программы
+	bool inverse = false;
 
-	a = IntArray(10000);
-	for (int i = 0; i < 10000; i++) {
-		a[i] = i;
-	}
-
-	int counter = 0;
-	IntArray::iterator aIter;
-	for (aIter = a.begin(); aIter != a.end(); ++aIter) {
-		assert(*aIter == counter);
-		++counter;
-	}
-	for (IntArray::reverse_iterator aReverseIter = a.rbegin();
-			aReverseIter != a.rend(); ++aReverseIter) {
-		--counter;
-		--aIter;
-		assert(*aReverseIter == counter);
-	}
-	assert(aIter == a.begin());
-}
-
-
-void testExceptions() {
-	bool exceptionWasThrown = false;
-
-	IntArray a = {1, 2};
-	try
+	bool operator()(const T& a, const T& b) const
 	{
-		a.at(2) = 3;
+		//std::cout << std::endl<< "I'm predicate left = "<<a<<", b = "<<b <<std::endl;
+		return inverse ? (a < b) : (a > b);
 	}
-	catch (Exception& e) {
-		std::cout << "Exception was thrown: " << e.what() << std::endl;
-		exceptionWasThrown = true;
-	}
+};
 
-	assert(exceptionWasThrown);
+template <typename typeIterator, typename TPredicate>
+void customSort(typeIterator first, typeIterator last, TPredicate predicate)
+{
+	for (auto i = first; i != (last - 1); ++i)
+		for (auto j = i + 1; j != (last); ++j)
+			if (predicate(*i, *j))
+				std::swap(*i, *j);
 }
 
 
-void testIterationConstness() {
-	IntArray a(10);
-	int counter = 0;
-	for (IntArray::iterator iter = a.begin(); iter != a.end(); ++iter) {
-		*iter = counter++;
+
+
+template <typename typeIterator, typename TPredicate>
+void merge(const typeIterator begin, const typeIterator mid, const typeIterator end, TPredicate predicate)
+{
+	Array<typename typeIterator::value_type> buffer(distance(begin, end));
+	buffer.clear();
+	typeIterator it_l(begin), it_r(mid);
+	const typeIterator it_mid(mid), it_end(end);
+
+	while (it_l != it_mid && it_r != it_end)
+	{
+		buffer.push_back(predicate(*it_l, *it_r) ? *(it_l++) : *(it_r++));
 	}
-	const IntArray b = a;
+
+	buffer.insert(buffer.end(), it_l, it_mid);
+	buffer.insert(buffer.end(), it_r, it_end);
+	it_l = begin;
+
+	for (auto iter = buffer.begin(); iter != buffer.end(); ++iter, ++it_l)
+		*it_l = *iter;
+}
+template <typename typeIterator, typename TPredicate>
+void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicate predicate)
+{
+	auto size = distance(first, last);
+	if (size < 2)
+		return;
+	auto mid = first + size / 2;
+
+	Merge_Sort_without_threads(first, mid, predicate);
+	Merge_Sort_without_threads(mid, last, predicate);
+
+	merge(first, mid, last, predicate);
+}
+
+
+
+template <typename typeIterator, typename TPredicate>
+void MergeSort(typeIterator first, typeIterator last, TPredicate predicate)
+{
+	static int flag = 0;
+
+	auto size = distance(first, last);
+	if (size < 2)
+		return;
+	auto mid = first + size / 2;
+	if (flag < thread::hardware_concurrency())
+	{
+		flag += 2;
+		thread t1(MergeSort<typeIterator, TPredicate>, first, mid, predicate);
+		thread t2(MergeSort<typeIterator, TPredicate>, mid, last, predicate);
+
+		t1.join();
+		t2.join();
+		merge(first, mid, last, predicate);
+	}
+	else
+	{
+		MergeSort(first, mid, predicate);
+		MergeSort(mid, last, predicate);
+
+		merge(first, mid, last, predicate);
+	}
+
+
 
 }
-*/
+
+
+
+/*void threadFunction(A& a, const int threadNumber) {
+std::cout << "thread #" << threadNumber
+<< ": a.counter() before == " << a.counter() << std::endl;
+a.increaseCounterWithLockGuard();
+std::cout << "thread #" << threadNumber
+<< ": a.counter() after == " << a.counter() << std::endl;
+}*/
+
+
+
+
+
+using std::vector;
+
+
 
 
 int main()
 {
-    const size_t N = 15;
-    Array<int> a(N);
+	unsigned concurentThreadsSupported = thread::hardware_concurrency();
+	cout << endl << concurentThreadsSupported << endl;
 
-     for (auto& i:a)
-        i = rand() % N;
 
-    for (auto i:a)
-        cout<<i << " ";
-    cout<< endl;
-    RuntimeLess<int> runtimeless;
-    runtimeless.inverse = 1;
-    MergeSort(a.begin(), a.end(), [](int& a, int& b) { return a < b;});
-    for (auto i:a)
-        cout<< i << " ";
-    return 0;
+	const size_t N = 15000000;
+	Array<int> a(N);
+	Array<int> b(N);
+	vector<int> c(N);
+	//std::vector<int> a(N);
+	for (auto& i : c)
+		i = rand() % N;
+	b.clear();
+	a.clear();
+	b.insert(b.begin(), c.begin(), c.end());
+	a.insert(a.begin(), c.begin(), c.end());
+	// for (auto i:a)
+	//     cout<<i << " ";
+	cout << endl;
+	RuntimeLess<int> runtimeless;
+	runtimeless.inverse = 1;
+
+
+	auto t1 = std::chrono::high_resolution_clock::now();
+	MergeSort(a.begin(), a.end(), [](int& a, int& b) { return a < b; });
+	//customSort(a.begin(), a.end(), [](int& a, int& b) { return a < b;});
+
+
+	auto t2 = std::chrono::high_resolution_clock::now();
+	std::cout << "Merge with current_support threads, seconds = " <<
+		std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1e+6 << std::endl;
+
+
+
+	t1 = std::chrono::high_resolution_clock::now();
+	Merge_Sort_without_threads(b.begin(), b.end(), [](int& a, int& b) { return a < b; });
+
+
+	t2 = std::chrono::high_resolution_clock::now();
+	std::cout << " Merge (without threads), seconds = " <<
+		std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1e+6 << std::endl;
+
+
+	t1 = std::chrono::high_resolution_clock::now();
+	std::sort(c.begin(), c.end(), runtimeless);
+
+	t2 = std::chrono::high_resolution_clock::now();
+	std::cout << "std::sort (without threads), seconds = " <<
+		std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1e+6 << std::endl;
+	
+	// for (auto i:a)
+	//     cout<< i << " ";
+	//cout << endl;
+	//for (auto i : b)
+	//	cout << i << " ";
+
+
+	system("pause");
+	return 0;
 }

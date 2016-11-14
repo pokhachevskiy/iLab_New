@@ -38,6 +38,7 @@ class Exception: public std::exception
 
 
 TPL
+//template<typename RAIterator>
 class Array
 {
     private:
@@ -108,8 +109,10 @@ class Array
                 push_back(*iter);
             ////////////
         }
-        void insert( const iterator& posit, size_t count, const T& value ); //from posit insert count position with value
-        void insert( const iterator& posit, const iterator& beg, const iterator& end);
+        template<typename RAIterator>
+        void insert( const RAIterator& posit, size_t count, const T& value ); //from posit insert count position with value
+        template<typename RAIterator>
+        void insert( const iterator& posit, const RAIterator& beg, const RAIterator& end);
         ////////////////////////
 
 
@@ -181,6 +184,10 @@ class Array<T>::iterator
             --vec_pointer;
             return *this;
         }
+		friend int operator - (iterator b, iterator a)
+		{
+			return distance(a, b);
+		}
         iterator operator-- (int in)
         {
             iterator tmp = *this;
@@ -228,6 +235,7 @@ class Array<T>::iterator
             return vec_pointer - ind;
         }
 };
+
 
 TPL
 class Array<T>::reverse_iterator
@@ -338,7 +346,8 @@ Array<T>& Array<T>::operator = (const Array<T>& vec)
 
 //insert and assign methods
 TPL
-void Array<T>::insert( const iterator& posit, size_t count, const T& value )
+template<typename RAIterator>
+void Array<T>::insert( const RAIterator& posit, size_t count, const T& value )
 {
     Array<T> res(pos + count);
     res.clear();
@@ -355,9 +364,10 @@ void Array<T>::insert( const iterator& posit, size_t count, const T& value )
 }
 
 TPL
-void Array<T>::insert( const iterator& posit, const iterator& beg, const iterator& last)
+template<typename RAIterator>
+void Array<T>::insert( const iterator& posit, const RAIterator& beg, const RAIterator& last)
 {
-    Array<T> res(pos + distance(beg, last));
+    Array<T> res(pos + (last - beg)); //////////////////!!!!!!!!!!!!!!
     res.clear();
     for (auto it = begin(); it != posit; ++it)
     {
@@ -579,73 +589,16 @@ bool Array<T>::is_empty()const
 {
     return ((pos <= 0) || (size_ <= 0));
 }
-////////////////////////////////////////////////////////////////////////
-
-//sorts / Distance /Runtime struct
-TPL
-struct RuntimeLess
-{
-	/// Ответ будет зависеть от флага, выставляемого в момент исполнения программы
-	bool inverse = false;
-
-	bool operator()(const T& a, const T& b) const
-	{
-	    //std::cout << std::endl<< "I'm predicate left = "<<a<<", b = "<<b <<std::endl;
-		return inverse ? (a < b) : (a > b);
-	}
-};
-
-template <typename typeIterator, typename TPredicate>
-void customSort (typeIterator first, typeIterator last, TPredicate predicate)
-{
-    for (auto i = first; i != (last - 1); ++i)
-        for (auto j = i + 1; j != (last); ++j)
-            if (predicate(*i, *j))
-                std::swap(*i, *j);
-}
-
-template <typename typeIterator, typename TPredicate>
-Array<typename typeIterator::value_type> merge(const typeIterator begin, const typeIterator mid, const typeIterator end, TPredicate predicate)
-{
-    Array<typename typeIterator::value_type> buffer(distance(begin, end));
-    buffer.clear();
-    typeIterator it_l( begin ), it_r( mid );
-    const typeIterator it_mid( mid ), it_end( end );
-
-    while (it_l != it_mid && it_r != it_end)
-    {
-        buffer.push_back(predicate(*it_l, *it_r) ? *(it_l++)  : *(it_r++) );
-    }
-
-    buffer.insert(buffer.end(), it_l, it_mid);
-    buffer.insert(buffer.end(), it_r, it_end);
-
-    return buffer;
-}
-
-template <typename typeIterator, typename TPredicate>
-void MergeSort (typeIterator first, typeIterator last, TPredicate predicate)
-{
-    auto size = distance(first, last);
-    if (size < 2)
-        return;
-    auto mid = first + size/2;
-    MergeSort(first, mid, predicate);
-    MergeSort(mid, last, predicate);
-
-    auto &&buf = merge(first, mid, last, predicate);
-    for (auto iter = buf.begin(); iter != buf.end(); ++iter, ++first)
-        *first = *iter;
-}
 
 template <typename It>
-long distance (It first, It last)
+long distance(It first, It last)
 {
-    long n = 0;
-    while(last-- != first)
-        n++;
-    return n;
+	long n = 0;
+	while (last-- != first)
+		n++;
+	return n;
 }
 ////////////////////////////////////////////////////////////////////////
+
 
 #endif // ARRAY_HPP_INCLUDED
