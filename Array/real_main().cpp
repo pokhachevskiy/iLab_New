@@ -39,9 +39,9 @@ void customSort(typeIterator first, typeIterator last, TPredicate predicate)
 
 
 template <typename typeIterator, typename TPredicate>
-void merge(const typeIterator begin, const typeIterator mid, const typeIterator end, TPredicate predicate)
+void merge(const typeIterator begin, const typeIterator mid, const typeIterator end, Array<typename typeIterator::value_type> &buffer,TPredicate predicate)
 {
-	Array<typename typeIterator::value_type> buffer(distance(begin, end));
+	//Array<typename typeIterator::value_type> buffer(distance(begin, end));
 	buffer.clear();
 	typeIterator it_l(begin), it_r(mid);
 	const typeIterator it_mid(mid), it_end(end);
@@ -59,7 +59,7 @@ void merge(const typeIterator begin, const typeIterator mid, const typeIterator 
 		*it_l = *iter;
 }
 template <typename typeIterator, typename TPredicate>
-void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicate predicate)
+void Merge_Sort_without_threads(typeIterator first, typeIterator last, Array<typename typeIterator::value_type> &buffer, TPredicate predicate)
 {
 	auto size = distance(first, last);
 	if (size < 2)
@@ -69,7 +69,15 @@ void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicat
 	Merge_Sort_without_threads(first, mid, predicate);
 	Merge_Sort_without_threads(mid, last, predicate);
 
-	merge(first, mid, last, predicate);
+	merge(first, mid, last, buffer, predicate);
+}
+
+
+template <typename typeIterator, typename TPredicate>
+void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicate predicate)
+{
+	Array<typename typeIterator::value_type> buffer(distance(first, last));
+	Merge_Sort_without_threads(first, last, buffer, predicate);
 }
 
 
@@ -77,13 +85,21 @@ void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicat
 template <typename typeIterator, typename TPredicate>
 void MergeSort(typeIterator first, typeIterator last, TPredicate predicate)
 {
-	static int flag = 0;
+	Array<typename typeIterator::value_type> buffer(distance(first, last));
+	MergeSort_t(first, last, buffer, predicate);
+}
 
+
+template <typename typeIterator, typename TPredicate>
+void MergeSort_t(typeIterator first, typeIterator last, Array<typename typeIterator::value_type> &buffer, TPredicate predicate)
+{
+	static int flag = 0;
+	static const int numb_th = thread::hardware_concurrency();
 	auto size = distance(first, last);
 	if (size < 2)
 		return;
 	auto mid = first + size / 2;
-	if (flag < thread::hardware_concurrency())
+	if (flag < numb_th)
 	{
 		flag += 2;
 		thread t1(MergeSort<typeIterator, TPredicate>, first, mid, predicate);
@@ -91,14 +107,16 @@ void MergeSort(typeIterator first, typeIterator last, TPredicate predicate)
 
 		t1.join();
 		t2.join();
-		merge(first, mid, last, predicate);
+		merge(first, mid, last, buffer, predicate);
+		//std::inplace_merge(first, mid, last, predicate);
 	}
 	else
 	{
 		MergeSort(first, mid, predicate);
 		MergeSort(mid, last, predicate);
 
-		merge(first, mid, last, predicate);
+		merge(first, mid, last, buffer, predicate);
+		//std::inplace_merge(first, mid, last, predicate);
 	}
 
 
@@ -116,6 +134,15 @@ std::cout << "thread #" << threadNumber
 }*/
 
 
+template<class Iter>
+void merge_std(Iter first, Iter last) {
+	if (last - first > 1) {
+		Iter middle = first + (last - first) / 2;
+		merge_std(first, middle); // [first, middle)
+		merge_std(middle, last);  // [middle, last)
+		std::inplace_merge(first, middle, last);
+	}
+}
 
 
 
@@ -169,17 +196,18 @@ int main()
 
 
 	t1 = std::chrono::high_resolution_clock::now();
-	std::sort(c.begin(), c.end(), runtimeless);
+	//std::sort(c.begin(), c.end(), runtimeless);
+	merge_std(c.begin(), c.end());
 
 	t2 = std::chrono::high_resolution_clock::now();
 	std::cout << "std::sort (without threads), seconds = " <<
 		std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1e+6 << std::endl;
-	
-	// for (auto i:a)
-	//     cout<< i << " ";
-	//cout << endl;
-	//for (auto i : b)
-	//	cout << i << " ";
+
+	/* for (auto i:a)
+	     cout<< i << " ";
+	cout << endl;
+	for (auto i : c)
+		cout << i << " ";*/
 
 
 	system("pause");
