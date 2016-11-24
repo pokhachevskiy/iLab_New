@@ -58,16 +58,18 @@ void merge(const typeIterator begin, const typeIterator mid, const typeIterator 
 	for (auto iter = buffer.begin(); iter != buffer.end(); ++iter, ++it_l)
 		*it_l = *iter;
 }
+
+
 template <typename typeIterator, typename TPredicate>
-void Merge_Sort_without_threads(typeIterator first, typeIterator last, Array<typename typeIterator::value_type> &buffer, TPredicate predicate)
+void Merge_Sort_without_threads_t(typeIterator first, typeIterator last, Array<typename typeIterator::value_type> &buffer, TPredicate predicate)
 {
 	auto size = distance(first, last);
 	if (size < 2)
 		return;
 	auto mid = first + size / 2;
 
-	Merge_Sort_without_threads(first, mid, predicate);
-	Merge_Sort_without_threads(mid, last, predicate);
+	Merge_Sort_without_threads_t(first, mid, buffer, predicate);
+	Merge_Sort_without_threads_t(mid, last, buffer, predicate);
 
 	merge(first, mid, last, buffer, predicate);
 }
@@ -77,7 +79,7 @@ template <typename typeIterator, typename TPredicate>
 void Merge_Sort_without_threads(typeIterator first, typeIterator last, TPredicate predicate)
 {
 	Array<typename typeIterator::value_type> buffer(distance(first, last));
-	Merge_Sort_without_threads(first, last, buffer, predicate);
+	Merge_Sort_without_threads_t(first, last, buffer, predicate);
 }
 
 
@@ -94,7 +96,7 @@ template <typename typeIterator, typename TPredicate>
 void MergeSort_t(typeIterator first, typeIterator last, Array<typename typeIterator::value_type> &buffer, TPredicate predicate)
 {
 	static int flag = 0;
-	static const int numb_th = thread::hardware_concurrency();
+	static const int numb_th = thread::hardware_concurrency() - 6; ////////////////s
 	auto size = distance(first, last);
 	if (size < 2)
 		return;
@@ -118,20 +120,10 @@ void MergeSort_t(typeIterator first, typeIterator last, Array<typename typeItera
 		merge(first, mid, last, buffer, predicate);
 		//std::inplace_merge(first, mid, last, predicate);
 	}
-
-
-
 }
 
 
 
-/*void threadFunction(A& a, const int threadNumber) {
-std::cout << "thread #" << threadNumber
-<< ": a.counter() before == " << a.counter() << std::endl;
-a.increaseCounterWithLockGuard();
-std::cout << "thread #" << threadNumber
-<< ": a.counter() after == " << a.counter() << std::endl;
-}*/
 
 
 template<class Iter>
